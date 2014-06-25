@@ -9,6 +9,100 @@ use Ouch;
 use POSIX qw(ceil);
 use XML::Simple;
 
+=head1 NAME
+
+USPS::RateRequest - Ultra fast USPS rate lookups.
+
+=head1 SYNOPSIS
+
+ use USPS::RateRequest;
+ use Box::Calc;
+
+ my $calc = Box::Calc->new();
+ $calc->add_box_type(...);
+ $calc->add_item(...);
+ $calc->pack_items;
+
+ my $rates = USPS::RateRequest->new(
+    user_id     => 'usps username'
+    password    => 'usps password',
+    from        => 53716,
+    to          => 90210,
+ )->request_rates($calc->boxes)->recv;
+
+ my $priority_postage_for_first_box = $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage};
+
+ # view the complete data structure
+ say Dumper($rates);
+
+=head1 DESCRIPTION
+
+USPS::RateRequest exists for two reasons:
+
+=over
+
+=item *
+
+L<Business::Shipping> is very slow when you have to request rates for varying amounts and sizes of parcels. That's because each request is done in serial. USPS::RateRequest makes all requests in parallel, thus increasing performance dramatically.
+
+=item *
+
+L<Box::Calc> does a ton of work figuring out exactly what can be packed into each parcel. USPS::RateRequest takes advantage of all that data being loaded and makes use of it to calculate very precise package dimensions and weights to get the most accurate shipping prices.
+
+=back
+
+=head1 METHODS
+
+=head2 new( params )
+
+Constructor.
+
+=over
+
+=item params
+
+A hash of initialization parameters.
+
+=over 
+
+=item test_mode
+
+Boolean. If true requests will be posted to the USPS test server rather than the production server.
+
+=item prod_uri
+
+The URI to the production instance of the USPS web tools web services. Defaults to C<http://production.shippingapis.com/ShippingAPI.dll>.
+
+=item test_uri
+
+The URI to the test instance of the USPS web tools web services. Defaults to C<http://testing.shippingapis.com/ShippingAPItest.dll>.
+
+=item user_id
+
+The username provided to you by signing up for USPS web tools here: L<https://www.usps.com/business/web-tools-apis/welcome.htm>
+
+=item password
+
+The password that goes with C<user_id>.
+
+=item from
+
+The zip code from which the parcels will ship.
+
+=item to
+
+The zip code (or country name, if the parcels are for an international destination) where the parcels will be delivered.
+
+=item service
+
+Defaults to C<all>. Optionally limit the response to specific delivery services, such as C<PRIORITY>. See the USPS web service documentation for details: L<https://www.usps.com/business/web-tools-apis/price-calculators.htm>
+
+=back
+
+=back
+
+=cut
+
 has 'test_mode' => (
     is          => 'rw',
     default     => 0,
@@ -51,6 +145,8 @@ has service => (
 
 __PACKAGE__->meta()->make_immutable();
 
+
+# this sub is almost a verbatim copy from Business::Shipping
 
 sub _generate_request_xml {
     my ($self, $boxes) = @_;
@@ -194,6 +290,23 @@ sub _generate_uri {
     return $self->test_mode ? $self->test_uri : $self->prod_uri;
 }
 
+=head2 request_rates ( boxes )
+
+Returns an L<AnyEvent> condition variable. When you call the C<recv> method on that variable it will send out all the requests for rates, collate and translate the responses, and return a hash reference that looks like this:
+
+ {
+
+
+ }
+
+=over
+
+=item boxes
+
+An array reference of boxes created by C<Box::Calc>.
+
+=cut
+
 sub request_rates {
     my ($self, $boxes) = @_;
     my @responses = ();
@@ -301,6 +414,10 @@ sub _handle_response {
     }
 }
 
+=head2 sanitize_service_name ( name )
+
+=cut
+
 sub sanitize_service_name {
     my ($class, $name) = @_;    
     my $remove_reg = quotemeta('&lt;sup&gt;&amp;reg;&lt;/sup&gt;');
@@ -319,6 +436,10 @@ sub sanitize_service_name {
     $name =~ s/priced box/Box/gi;
     return 'USPS '.$name;
 }
+
+=head2 translate_service_name_to_category ( name )
+
+=cut
 
 sub translate_service_name_to_category {
     my ($class, $name) = @_;
@@ -339,6 +460,12 @@ sub translate_service_name_to_category {
     }
     return $name;
 }
+
+=head2 domestic ( )
+
+Returns a 1 or 0 depending upon whether a zip code or country was specified in the C<to> field in the constructor.
+
+=cut
 
 sub domestic {
     my $self = shift;
