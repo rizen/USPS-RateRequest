@@ -472,5 +472,11 @@ sub domestic {
     return $self->to =~ m/^\d{5}$/ ? 1 : 0;
 }
 
+=head1 CAVEATS
+
+Although Box::Calc doesn't care what units you use for weights and measurements, USPS does. Make sure all your weights are in ounces and all your measurements are in inches.
+
+=cut
+
 1;
 
