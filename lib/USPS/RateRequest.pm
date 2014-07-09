@@ -420,12 +420,10 @@ sub _handle_response {
 
 sub sanitize_service_name {
     my ($class, $name) = @_;    
-    my $remove_reg = quotemeta('&lt;sup&gt;&amp;reg;&lt;/sup&gt;');
     my $remove_tm  = quotemeta('&lt;sup&gt;&amp;trade;&lt;/sup&gt;');
     my $remove_gxg = quotemeta(' (GXG)');
     $name =~ s/\*//g;
-    $name =~ s/$remove_reg//gi;
-    $name =~ s/$remove_tm//gi;
+    $name =~ s{&lt;sup&gt;&(?:amp;reg|amp;trade|#174);&lt;/sup&gt;}{}gi;
     $name =~ s/$remove_gxg//gi;
     $name =~ s/GXG/Global Express Guaranteed/gi;
     $name =~ s/ Mail//gi;
