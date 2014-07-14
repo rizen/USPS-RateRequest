@@ -67,7 +67,7 @@ note "International";
 foreach my $name (@names) {
     note $name;
 }
-note "Domestic Translation Table";
+note "International Translation Table";
 foreach my $name (@names) {
     note $name . ' : ', $services{ $name }->{ label };
 }

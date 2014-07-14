@@ -97,6 +97,10 @@ The zip code (or country name, if the parcels are for an international destinati
 
 Defaults to C<all>. Optionally limit the response to specific delivery services, such as C<PRIORITY>. See the USPS web service documentation for details: L<https://www.usps.com/business/web-tools-apis/price-calculators.htm>
 
+=item debug
+
+Add it additional items into the returned rate request data for debugging issues with rate lookups and name sanitization.  This data is not guaranteed to stay the same from release to release.
+
 =back
 
 =back
@@ -396,9 +400,11 @@ sub _handle_response {
                 $services{$service_name} = {
                     #id          => 'USPS-Domestic-'.$service->{CLASSID},
                     #category    => $self->translate_service_name_to_category($service_name),
-                    label       => $service->{MailService},
                     postage     => $service->{Rate},
                 };
+                if ($self->debug) {
+                    $services{$service_name}->{label} = $service->{MailService};
+                }
             }
             $rates->{$package->{ID}} = \%services;
         }
@@ -411,9 +417,11 @@ sub _handle_response {
                 $services{$service_name} = {
                     #id          => 'USPS-International-'.$service->{ID},
                     #category    => $self->translate_service_name_to_category($service_name),
-                    label       => $service->{SvcDescription},
                     postage     => $service->{Postage},
                 };
+                if ($self->debug) {
+                    $services{$service_name}->{label} = $service->{SvcDescription};
+                }
             }
             $rates->{$package->{ID}} = \%services;
         }
