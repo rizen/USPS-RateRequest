@@ -35,7 +35,6 @@ my $rate = USPS::RateRequest->new(
     password    => $password,
     from        => 53716,
     to          => 90210,
-    debug       => 1,
 );
 my $rates = $rate->request_rates($calc->boxes)->recv;
 
@@ -50,7 +49,7 @@ foreach my $name (@names) {
 }
 note "Domestic Translation Table";
 foreach my $name (@names) {
-    note $name . ' : ', $services{ $name }->{ service };
+    note $name . ' : ', $services{ $name }->{ label };
 }
 
 $rate = USPS::RateRequest->new(
@@ -58,7 +57,6 @@ $rate = USPS::RateRequest->new(
     password    => $password,
     from        => 53716,
     to          => 'Australia',
-    debug       => 1,
 );
 $rates = $rate->request_rates($calc->boxes)->recv;
 
@@ -71,7 +69,7 @@ foreach my $name (@names) {
 }
 note "Domestic Translation Table";
 foreach my $name (@names) {
-    note $name . ' : ', $services{ $name }->{ service };
+    note $name . ' : ', $services{ $name }->{ label };
 }
 
 done_testing();

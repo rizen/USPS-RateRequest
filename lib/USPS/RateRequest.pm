@@ -396,12 +396,9 @@ sub _handle_response {
                 $services{$service_name} = {
                     #id          => 'USPS-Domestic-'.$service->{CLASSID},
                     #category    => $self->translate_service_name_to_category($service_name),
-                    #label       => $service->{MailService},
+                    label       => $service->{MailService},
                     postage     => $service->{Rate},
                 };
-                if ($self->debug) {
-                    $services{$service_name}->{service} = $service->{MailService};
-                }
             }
             $rates->{$package->{ID}} = \%services;
         }
@@ -414,12 +411,9 @@ sub _handle_response {
                 $services{$service_name} = {
                     #id          => 'USPS-International-'.$service->{ID},
                     #category    => $self->translate_service_name_to_category($service_name),
-                    #label       => $service->{SvcDescription},
+                    label       => $service->{SvcDescription},
                     postage     => $service->{Postage},
                 };
-                if ($self->debug) {
-                    $services{$service_name}->{service} = $service->{SvcDescription};
-                }
             }
             $rates->{$package->{ID}} = \%services;
         }
