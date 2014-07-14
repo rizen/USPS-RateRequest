@@ -11,7 +11,6 @@ if (!$user_id || !$password) {
     plan skip_all => 'Missing USPS_USERID or USPS_PASSWORD';
 }
 
-
 use_ok 'USPS::RateRequest';
 
 my $calc = Box::Calc->new();
@@ -36,27 +35,43 @@ my $rate = USPS::RateRequest->new(
     password    => $password,
     from        => 53716,
     to          => 90210,
+    debug       => 1,
 );
 my $rates = $rate->request_rates($calc->boxes)->recv;
 
 
-my %services = %{$rates->{$calc->get_box(0)->id}};
+my $box = $calc->get_box(0)->id;
+my %services = %{ $rates->{ $box } };
 
+note "Domestic";
+my @names = sort keys %services;
+foreach my $name (@names) {
+    note $name;
+}
+note "Domestic Translation Table";
+foreach my $name (@names) {
+    note $name . ' : ', $services{ $name }->{ service };
+}
 
 $rate = USPS::RateRequest->new(
     user_id     => $user_id,
     password    => $password,
     from        => 53716,
     to          => 'Australia',
+    debug       => 1,
 );
 $rates = $rate->request_rates($calc->boxes)->recv;
 
-%services = (%services, %{$rates->{$calc->get_box(0)->id}});
+%services = %{$rates->{$calc->get_box(0)->id}};
 
-my @names = keys %services;
-
-foreach my $name (sort @names) {
+note "International";
+@names = sort keys %services;
+foreach my $name (@names) {
     note $name;
+}
+note "Domestic Translation Table";
+foreach my $name (@names) {
+    note $name . ' : ', $services{ $name }->{ service };
 }
 
 done_testing();

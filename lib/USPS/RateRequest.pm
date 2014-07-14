@@ -143,6 +143,12 @@ has service => (
     default     => 'all',
 );
 
+has debug => (
+    is          => 'rw',
+    default     => 0,
+    isa         => 'Int',
+);
+
 __PACKAGE__->meta()->make_immutable();
 
 
@@ -393,6 +399,9 @@ sub _handle_response {
                     #label       => $service->{MailService},
                     postage     => $service->{Rate},
                 };
+                if ($self->debug) {
+                    $services{$service_name}->{service} = $service->{MailService};
+                }
             }
             $rates->{$package->{ID}} = \%services;
         }
@@ -408,6 +417,9 @@ sub _handle_response {
                     #label       => $service->{SvcDescription},
                     postage     => $service->{Postage},
                 };
+                if ($self->debug) {
+                    $services{$service_name}->{service} = $service->{SvcDescription};
+                }
             }
             $rates->{$package->{ID}} = \%services;
         }
@@ -427,7 +439,7 @@ sub sanitize_service_name {
     $name =~ s/$remove_gxg//gi;
     $name =~ s/GXG/Global Express Guaranteed/gi;
     $name =~ s/ Mail//gi;
-    $name =~ s/ 2-Day//gi;
+    $name =~ s/ \d-Day//gi;
     $name =~ s/ International//gi;
     $name =~ s/USPS //gi;
     $name =~ s/Envelopes/Envelope/gi;
