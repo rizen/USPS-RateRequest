@@ -423,10 +423,11 @@ sub sanitize_service_name {
     my $remove_tm  = quotemeta('&lt;sup&gt;&amp;trade;&lt;/sup&gt;');
     my $remove_gxg = quotemeta(' (GXG)');
     $name =~ s/\*//g;
-    $name =~ s{&lt;sup&gt;&(?:amp;reg|amp;trade|#174);&lt;/sup&gt;}{}gi;
+    $name =~ s{&lt;sup&gt;&(?:amp;reg|amp;trade|#174|#8482);&lt;/sup&gt;}{}gi;
     $name =~ s/$remove_gxg//gi;
     $name =~ s/GXG/Global Express Guaranteed/gi;
     $name =~ s/ Mail//gi;
+    $name =~ s/ 2-Day//gi;
     $name =~ s/ International//gi;
     $name =~ s/USPS //gi;
     $name =~ s/Envelopes/Envelope/gi;
