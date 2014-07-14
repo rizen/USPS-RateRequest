@@ -1,9 +1,15 @@
 use strict;
 use Test::More;
 use lib '../lib';
-use BCS::Perl;
-use BCS;
 use Box::Calc;
+use 5.010;
+
+my $user_id  = $ENV{USPS_USERID};
+my $password = $ENV{USPS_PASSWORD};
+
+if (!$user_id || !$password) {
+    plan skip_all => 'Missing USPS_USERID or USPS_PASSWORD';
+}
 
 use_ok 'USPS::RateRequest';
 
@@ -25,8 +31,8 @@ $calc->add_item(2,
 $calc->pack_items;
 
 my $rate = USPS::RateRequest->new(
-    user_id     => BCS->config->get('usps/user_id'),
-    password    => BCS->config->get('usps/password'),
+    user_id     => $user_id,
+    password    => $password,
     from        => 53716,
     to          => 90210,
 );
@@ -35,14 +41,15 @@ my $rate = USPS::RateRequest->new(
 isa_ok $rate, 'USPS::RateRequest';
 my $rates = $rate->request_rates($calc->boxes)->recv;
 is scalar(keys %$rates), 2, 'got back 2 packages worth of rates from California';
+
+use Data::Printer;
+p $rates;
+
 cmp_ok $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage}, '>', 0, 'got a rate from California';
 
-use Data::Dumper;
-say Dumper $rates;
-
 $rate = USPS::RateRequest->new(
-    user_id     => BCS->config->get('usps/user_id'),
-    password    => BCS->config->get('usps/password'),
+    user_id     => $user_id,
+    password    => $password,
     from        => 53716,
     to          => 'Australia',
 );
@@ -53,7 +60,7 @@ is scalar(keys %$rates), 2, 'got back 2 packages worth of rates from Australia';
 cmp_ok $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage}, '>', 0, 'got a rate from Australia';
 
 
-say Dumper $rates;
+p $rates;
 
 
 

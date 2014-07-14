@@ -1,9 +1,16 @@
 use strict;
 use Test::More;
 use lib '../lib';
-use BCS::Perl;
-use BCS;
 use Box::Calc;
+use 5.010;
+
+my $user_id  = $ENV{USPS_USERID};
+my $password = $ENV{USPS_PASSWORD};
+
+if (!$user_id || !$password) {
+    plan skip_all => 'Missing USPS_USERID or USPS_PASSWORD';
+}
+
 
 use_ok 'USPS::RateRequest';
 
@@ -25,8 +32,8 @@ $calc->add_item(1,
 $calc->pack_items;
 
 my $rate = USPS::RateRequest->new(
-    user_id     => BCS->config->get('usps/user_id'),
-    password    => BCS->config->get('usps/password'),
+    user_id     => $user_id,
+    password    => $password,
     from        => 53716,
     to          => 90210,
 );
@@ -37,8 +44,8 @@ my %services = %{$rates->{$calc->get_box(0)->id}};
 
 
 $rate = USPS::RateRequest->new(
-    user_id     => BCS->config->get('usps/user_id'),
-    password    => BCS->config->get('usps/password'),
+    user_id     => $user_id,
+    password    => $password,
     from        => 53716,
     to          => 'Australia',
 );
