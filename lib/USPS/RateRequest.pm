@@ -8,6 +8,7 @@ use AnyEvent;
 use Ouch;
 use POSIX qw(ceil);
 use XML::Simple;
+use 5.010;
 
 =head1 NAME
 
@@ -323,6 +324,9 @@ sub request_rates {
     my $cv = AnyEvent->condvar;
     $cv->begin(sub { shift->send($self->_handle_responses(\@responses)) });
     foreach my $request_xml (@{$self->_generate_requests($boxes)}) {
+        if ($self->debug) {
+            say $request_xml;
+        }
         $cv->begin;
         my $content = 'API=' . ($self->domestic ? 'RateV4' : 'IntlRateV2') . '&XML=' . $request_xml;
         my $ua = AnyEvent::HTTP::LWP::UserAgent->new;
@@ -354,6 +358,9 @@ sub _handle_responses {
 
 sub _handle_response {
     my ($self, $response, $rates) = @_;
+    if ($self->debug) {
+        say $response->decoded_content;
+    }
 
     ### Keep the root element, because USPS might return an error and 'Error' will be the root element
     my $response_tree = XML::Simple::XMLin(
