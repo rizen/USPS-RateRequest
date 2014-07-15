@@ -136,6 +136,7 @@ has password => (
 has from => (
     is          => 'rw',
     isa         => 'Int',
+    required    => 1,
 );
 
 has to => (
