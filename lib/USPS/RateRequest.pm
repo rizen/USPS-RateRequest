@@ -12,28 +12,36 @@ use 5.010;
 
 =head1 NAME
 
-USPS::RateRequest - Ultra fast USPS rate lookups.
+USPS::RateRequest - Ultra fast parallelized asyncronous USPS rate lookups.
 
 =head1 SYNOPSIS
 
  use USPS::RateRequest;
  use Box::Calc;
+ use Ouch;
 
  my $calc = Box::Calc->new();
  $calc->add_box_type(...);
  $calc->add_item(...);
  $calc->pack_items;
 
- my $rates = USPS::RateRequest->new(
-    user_id     => 'usps username'
-    password    => 'usps password',
-    from        => 53716,
-    to          => 90210,
- )->request_rates($calc->boxes)->recv;
+ my $rates = eval {
+    USPS::RateRequest->new(
+        user_id     => 'usps username'
+        password    => 'usps password',
+        from        => 53716,
+        to          => 90210,
+     )->request_rates($calc->boxes)->recv;
+ };
+
+ if (hug) {
+    die "USPS Error: $@";
+ }
 
  my $priority_postage_for_first_box = $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage};
 
  # view the complete data structure
+ use Data::Dumper;
  say Dumper($rates);
 
 =head1 DESCRIPTION
@@ -52,6 +60,8 @@ L<Box::Calc> does a ton of work figuring out exactly what can be packed into eac
 
 =back
 
+If there are errors returned from the USPS, USPS::RateRequest will throw exceptions via L<Ouch> with the code "USPS Error" and the error returned from the USPS.  If no rates are returned at all, then it will throw an exception with the code "No Rates".
+
 =head1 METHODS
 
 =head2 new( params )
@@ -62,7 +72,7 @@ Constructor.
 
 =item params
 
-A hash of initialization parameters.
+A hash of initialization parameters.  An asterisk denotes required parameters.
 
 =over 
 
@@ -78,19 +88,19 @@ The URI to the production instance of the USPS web tools web services. Defaults 
 
 The URI to the test instance of the USPS web tools web services. Defaults to C<http://testing.shippingapis.com/ShippingAPItest.dll>.
 
-=item user_id
+=item user_id (*)
 
 The username provided to you by signing up for USPS web tools here: L<https://www.usps.com/business/web-tools-apis/welcome.htm>
 
-=item password
+=item password (*)
 
 The password that goes with C<user_id>.
 
-=item from
+=item from (*)
 
 The zip code from which the parcels will ship.
 
-=item to
+=item to (*)
 
 The zip code (or country name, if the parcels are for an international destination) where the parcels will be delivered.
 
@@ -100,7 +110,7 @@ Defaults to C<all>. Optionally limit the response to specific delivery services,
 
 =item debug
 
-Add it additional items into the returned rate request data for debugging issues with rate lookups and name sanitization.  This data is not guaranteed to stay the same from release to release.
+Add additional items into the returned rate request data for debugging issues with rate lookups and name sanitization.  This data is not guaranteed to stay the same from release to release.
 
 =back
 
@@ -307,7 +317,31 @@ sub _generate_uri {
 Returns an L<AnyEvent> condition variable. When you call the C<recv> method on that variable it will send out all the requests for rates, collate and translate the responses, and return a hash reference that looks like this:
 
  {
-
+        'box-id-1' => {
+                        'USPS Priority Small Flat Rate Box' => {
+                                                               'postage' => '5.80'
+                                                             },
+                        'USPS Priority Express Hold For Pickup' => {
+                                                                   'postage' => '56.05'
+                                                                 },
+                        'USPS Priority Express Flat Rate Envelope' => {
+                                                                      'postage' => '19.99'
+                                                                    },
+                        'USPS Priority Medium Flat Rate Box' => {
+                                                                'postage' => '12.35'
+                                                              },
+                        'USPS Standard Post' => {
+                                                'postage' => '13.34'
+                                              },
+                        'USPS Media' => {
+                                        'postage' => '4.61'
+                                      },
+                        [....]
+        },
+        'box-id-2' => {
+                        [....]
+        },
+        [....]
 
  }
 
@@ -316,6 +350,8 @@ Returns an L<AnyEvent> condition variable. When you call the C<recv> method on t
 =item boxes
 
 An array reference of boxes created by C<Box::Calc>.
+
+=back
 
 =cut
 
@@ -496,6 +532,19 @@ sub domestic {
 =head1 CAVEATS
 
 Although Box::Calc doesn't care what units you use for weights and measurements, USPS does. Make sure all your weights are in ounces and all your measurements are in inches.
+
+=head1 AUTHOR
+
+=over
+
+=item JT Smith <jt_at_plainblack_dot_com>
+
+=back
+
+=head1 LEGAL
+
+Box::Calc is Copyright 2014 Plain Black Corporation (L<http://www.plainblack.com>) and is licensed under the same terms as Perl itself.
+
 
 =cut
 
