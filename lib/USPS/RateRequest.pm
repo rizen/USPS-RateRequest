@@ -442,8 +442,6 @@ sub _handle_response {
             foreach my $service (@{$package->{Postage}}) {
                 my $service_name = $self->sanitize_service_name($service->{MailService});
                 $services{$service_name} = {
-                    #id          => 'USPS-Domestic-'.$service->{CLASSID},
-                    #category    => $self->translate_service_name_to_category($service_name),
                     postage     => $service->{Rate},
                 };
                 if ($self->debug) {
@@ -459,8 +457,6 @@ sub _handle_response {
             foreach my $service (@{$package->{Service}}) {
                 my $service_name = $self->sanitize_service_name($service->{SvcDescription});
                 $services{$service_name} = {
-                    #id          => 'USPS-International-'.$service->{ID},
-                    #category    => $self->translate_service_name_to_category($service_name),
                     postage     => $service->{Postage},
                 };
                 if ($self->debug) {
@@ -492,30 +488,6 @@ sub sanitize_service_name {
     $name =~ s/Boxes/Box/gi;
     $name =~ s/priced box/Box/gi;
     return 'USPS '.$name;
-}
-
-=head2 translate_service_name_to_category ( name )
-
-=cut
-
-sub translate_service_name_to_category {
-    my ($class, $name) = @_;
-    if ($name =~ m/^USPS Priority.+Flat Rate/) {
-        $name = 'USPS Priority Flat Rate';
-    }
-    elsif ($name =~ m/^USPS Express.+Flat Rate/) {
-        $name = 'USPS Express Flat Rate';
-    }
-    elsif ($name =~ m/^USPS Express Hold For Pickup/) {
-        $name = 'USPS Express';
-    }
-    elsif ($name =~ m/^USPS Global Express Guaranteed/) {
-        $name = 'USPS Global Express Guaranteed';
-    }
-    elsif ($name =~ m/^USPS First-Class/) {
-        $name = 'USPS First-Class';
-    }
-    return $name;
 }
 
 =head2 domestic ( )
