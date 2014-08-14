@@ -35,6 +35,7 @@ my $rate = USPS::RateRequest->new(
     password    => $password,
     from        => 53716,
     to          => 90210,
+    debug       => 1,
 );
 my $rates = $rate->request_rates($calc->boxes)->recv;
 
@@ -57,6 +58,7 @@ $rate = USPS::RateRequest->new(
     password    => $password,
     from        => 53716,
     to          => 'Australia',
+    debug       => 1,
 );
 $rates = $rate->request_rates($calc->boxes)->recv;
 
