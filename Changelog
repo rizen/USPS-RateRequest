@@ -1,2 +1,6 @@
-version 0.0100 - June 23, 2014
+version 0.0101 - September 5, 2014
+ * Added missing dependency for XML::Simple.
+
+version 0.0100 - August 28, 2014
  * First public release.
+
