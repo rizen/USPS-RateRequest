@@ -30,7 +30,8 @@ USPS::RateRequest - Ultra fast parallelized asyncronous USPS rate lookups.
         user_id     => 'usps username'
         password    => 'usps password',
         from        => 53716,
-        to          => 90210,
+        postal_code => 90210,
+        country     => 'US',
      )->request_rates($calc->boxes)->recv;
  };
 
@@ -100,9 +101,15 @@ The password that goes with C<user_id>.
 
 The zip code from which the parcels will ship.
 
-=item to (*)
+=item postal_code (*)
 
-The zip code (or country name, if the parcels are for an international destination) where the parcels will be delivered.
+The postal_code code where the parcels will be delivered.
+
+=item country (*)
+
+The name of the country where the parcels will be delivered.  See the USPS web services documentation
+for a list of valid countries. L<https://www.usps.com/business/web-tools-apis/price-calculators.htm>
+The proper name for the USA is "United States of America".
 
 =item service
 
@@ -149,7 +156,12 @@ has from => (
     required    => 1,
 );
 
-has to => (
+has postal_code => (
+    is          => 'rw',
+    required    => 1,
+);
+
+has country => (
     is          => 'rw',
     required    => 1,
 );
@@ -201,7 +213,10 @@ sub _generate_request_xml {
             $package_element->appendChild($zip_origin_element);
 
             my $zip_destination_element = $rate_request_document->createElement('ZipDestination');
-            $zip_destination_element->appendChild($rate_request_document->createTextNode($self->to));
+            ##USPS only supports ZIP, not ZIP+4 formats
+            my $zip = $self->postal_code;
+            $zip =~ s/(\d{5})-\d{4}/$1/;
+            $zip_destination_element->appendChild($rate_request_document->createTextNode($zip));
             $package_element->appendChild($zip_destination_element);
         }
 
@@ -236,7 +251,7 @@ sub _generate_request_xml {
             $package_element->appendChild($value_of_contents_element);            
 
             my $country_element = $rate_request_document->createElement('Country');
-            $country_element->appendChild($rate_request_document->createTextNode($self->to));
+            $country_element->appendChild($rate_request_document->createTextNode($self->country));
             $package_element->appendChild($country_element);            
 
         }
@@ -492,13 +507,13 @@ sub sanitize_service_name {
 
 =head2 domestic ( )
 
-Returns a 1 or 0 depending upon whether a zip code or country was specified in the C<to> field in the constructor.
+Returns a 1 or 0 depending upon whether the C<country> is 'United States of America'.
 
 =cut
 
 sub domestic {
     my $self = shift;
-    return $self->to =~ m/^\d{5}$/ ? 1 : 0;
+    return $self->country eq 'United States of America' ? 1 : 0;
 }
 
 =head1 CAVEATS

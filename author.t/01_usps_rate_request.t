@@ -25,8 +25,8 @@ $calc->add_item(2,
     x => 8,
     y => 8,
     z => 5.75,
-    name => 'small pumpkin',
-    weight => 66,
+    name => 'tiny pumpkin',
+    weight => 10,
 );
 $calc->pack_items;
 
@@ -34,7 +34,8 @@ my $rate = USPS::RateRequest->new(
     user_id     => $user_id,
     password    => $password,
     from        => 53716,
-    to          => 90210,
+    postal_code => 90210,
+    country     => 'United States of America',
 );
 
 
@@ -51,7 +52,8 @@ $rate = USPS::RateRequest->new(
     user_id     => $user_id,
     password    => $password,
     from        => 53716,
-    to          => 'Australia',
+    country     => 'Australia',
+    postal_code => 5068,
 );
 
 isa_ok $rate, 'USPS::RateRequest';
@@ -62,7 +64,22 @@ cmp_ok $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage}, '>', 0, 'got a
 
 p $rates;
 
-
+$rate = USPS::RateRequest->new(
+    user_id     => $user_id,
+    password    => $password,
+    from        => 53716,
+    country     => 'United Kingdom',
+    postal_code => "EC1Y 8SY",
+);
+isa_ok $rate, 'USPS::RateRequest';
+$rates = eval { $rate->request_rates($calc->boxes)->recv; };
+if ($rates) {
+    is scalar(keys %$rates), 2, 'got back 2 packages worth of rates from United Kingdom';
+    cmp_ok $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage}, '>', 0, 'got a rate from United Kingdom';
+    p $rates;
+}
+else {
+    fail "Error getting rates for United Kingdom: $@";
+}
 
 done_testing();
-
