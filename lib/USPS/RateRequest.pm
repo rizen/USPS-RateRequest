@@ -410,6 +410,11 @@ sub _handle_responses {
 
 sub _handle_response {
     my ($self, $response, $rates) = @_;
+
+    unless (ref $response eq 'HTTP::Response') {
+        ouch 500, $response;
+    }
+
     if ($self->debug) {
         say $response->decoded_content;
     }
@@ -497,6 +502,8 @@ sub sanitize_service_name {
     $name =~ s/GXG/Global Express Guaranteed/gi;
     $name =~ s/ Mail//gi;
     $name =~ s/ \d-Day//gi;
+    $name =~ s/ APO\/FPO\/DPO//gi;
+    $name =~ s/ Military//gi;
     $name =~ s/ International//gi;
     $name =~ s/USPS //gi;
     $name =~ s/Envelopes/Envelope/gi;

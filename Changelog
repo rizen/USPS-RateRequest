@@ -1,3 +1,6 @@
+version 1.0001 - June 3, 2015
+ * Added sanitization of military mailing labels, because there aren't specific military shipping boxes.
+
 version 1.0000 - September 14, 2014
  * Major API change
 
