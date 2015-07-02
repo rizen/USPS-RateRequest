@@ -82,4 +82,22 @@ else {
     fail "Error getting rates for United Kingdom: $@";
 }
 
+$rate = USPS::RateRequest->new(
+    user_id     => $user_id,
+    password    => $password,
+    from        => 53716,
+    country     => 'Canada',
+    postal_code => "M4K1N2",
+);
+isa_ok $rate, 'USPS::RateRequest';
+$rates = eval { $rate->request_rates($calc->boxes)->recv; };
+if ($rates) {
+    is scalar(keys %$rates), 2, 'got back 2 packages worth of rates from Canada';
+    cmp_ok $rates->{$calc->get_box(0)->id}{'USPS Priority'}{postage}, '>', 0, 'got a rate from Canada';
+    p $rates;
+}
+else {
+    fail "Error getting rates for Canada: $@";
+}
+
 done_testing();

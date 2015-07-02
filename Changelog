@@ -1,3 +1,6 @@
+version 1.0002 - July 2, 2015
+ * Fixed international rate request for non-flat rate USPS Priority to Canada per the changes documented here: https://www.usps.com/business/web-tools-apis/2015-may-webtools-release-notes.rtf
+
 version 1.0001 - June 3, 2015
  * Added sanitization of military mailing labels, because there aren't specific military shipping boxes.
 

@@ -194,9 +194,9 @@ sub _generate_request_xml {
     $rate_request_document->appendChild($rate_request_element);
 
 # needed for special services    
-#    my $revision_element = $rate_request_document->createElement('Revision');
-#    $revision_element->appendChild($rate_request_document->createTextNode(2));
-#    $rate_request_element->appendChild($revision_element);
+    my $revision_element = $rate_request_document->createElement('Revision');
+    $revision_element->appendChild($rate_request_document->createTextNode(2));
+    $rate_request_element->appendChild($revision_element);
 
     foreach my $box (@{ $boxes }) {
         my $package_element = $rate_request_document->createElement('Package');
@@ -279,6 +279,12 @@ sub _generate_request_xml {
         my $girth_element   = $rate_request_document->createElement('Girth');
         $girth_element->appendChild($rate_request_document->createTextNode($box->girth));
         $package_element->appendChild($girth_element);
+
+            if ($self->country eq 'Canada') {
+                my $origin_zip = $rate_request_document->createElement('OriginZip');
+                $origin_zip->appendChild($rate_request_document->createTextNode($self->from));
+                $package_element->appendChild($origin_zip);            
+            }
 
         if ($self->domestic) {
             if ($self->service =~ /all/i and not defined $box->mail_machinable()) {
