@@ -30,6 +30,7 @@ $calc->add_item(1,
 );
 $calc->pack_items;
 
+# Domestic
 my $rate = USPS::RateRequest->new(
     user_id     => $user_id,
     password    => $password,
@@ -54,6 +55,7 @@ foreach my $name (@names) {
     note $name . ' : ', $services{ $name }->{ label };
 }
 
+# International
 $rate = USPS::RateRequest->new(
     user_id     => $user_id,
     password    => $password,
@@ -72,6 +74,75 @@ foreach my $name (@names) {
     note $name;
 }
 note "International Translation Table";
+foreach my $name (@names) {
+    note $name . ' : ', $services{ $name }->{ label };
+}
+
+# DPO
+$rate = USPS::RateRequest->new(
+    user_id     => $user_id,
+    password    => $password,
+    from        => 53716,
+    country     => 'United States of America',
+    postal_code => '09892',
+    debug       => 1,
+);
+$rates = $rate->request_rates($calc->boxes)->recv;
+
+%services = %{$rates->{$calc->get_box(0)->id}};
+
+note "DPO";
+@names = sort keys %services;
+foreach my $name (@names) {
+    note $name;
+}
+note "DPO Translation Table";
+foreach my $name (@names) {
+    note $name . ' : ', $services{ $name }->{ label };
+}
+
+# APO
+$rate = USPS::RateRequest->new(
+    user_id     => $user_id,
+    password    => $password,
+    from        => 53716,
+    country     => 'United States of America',
+    postal_code => '96204-3027',
+    debug       => 1,
+);
+$rates = $rate->request_rates($calc->boxes)->recv;
+
+%services = %{$rates->{$calc->get_box(0)->id}};
+
+note "APO";
+@names = sort keys %services;
+foreach my $name (@names) {
+    note $name;
+}
+note "APO Translation Table";
+foreach my $name (@names) {
+    note $name . ' : ', $services{ $name }->{ label };
+}
+
+# FPO
+$rate = USPS::RateRequest->new(
+    user_id     => $user_id,
+    password    => $password,
+    from        => 53716,
+    country     => 'United States of America',
+    postal_code => '96677',
+    debug       => 1,
+);
+$rates = $rate->request_rates($calc->boxes)->recv;
+
+%services = %{$rates->{$calc->get_box(0)->id}};
+
+note "FPO";
+@names = sort keys %services;
+foreach my $name (@names) {
+    note $name;
+}
+note "FPO Translation Table";
 foreach my $name (@names) {
     note $name . ' : ', $services{ $name }->{ label };
 }

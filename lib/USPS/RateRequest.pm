@@ -509,6 +509,9 @@ sub sanitize_service_name {
     $name =~ s/ Mail//gi;
     $name =~ s/ \d-Day//gi;
     $name =~ s/ APO\/FPO\/DPO//gi;
+    $name =~ s/ APO//gi;
+    $name =~ s/ DPO//gi;
+    $name =~ s/ FPO//gi;
     $name =~ s/ Military//gi;
     $name =~ s/ International//gi;
     $name =~ s/USPS //gi;
