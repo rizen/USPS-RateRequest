@@ -1,3 +1,6 @@
+version 1.0004 - March 9, 2016
+ * Added XML::DOM to prereqs.
+
 version 1.0003 - February 29, 2016
  * Fixed a problem with APO/FPO/DPO sanitation.
 
